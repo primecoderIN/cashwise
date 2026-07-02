@@ -1,138 +1,135 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, X } from "lucide-react";
+import { Plus, Trash2, FolderGit2 } from "lucide-react";
 import { createGroup, deleteGroup } from "@/actions/groupActions";
+import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
+import Input, { TextArea } from "@/components/ui/Input";
+import EmptyState from "@/components/ui/EmptyState";
+import { useToast } from "@/components/ui/Toast";
+import type { ExpenseGroup } from "@/types";
 
-export default function GroupClient({ groups }: { groups: any[] }) {
-  const [isOpen, setIsOpen] = useState(false);
+const GROUP_COLORS = ["#7c3aed", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#ec4899"];
+
+export default function GroupClient({ groups }: { groups: ExpenseGroup[] }) {
+  const { toast } = useToast();
+  const [isOpen, setIsOpen]             = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [deletingId, setDeletingId]     = useState<string | null>(null);
+  const [name, setName]                 = useState("");
+  const [description, setDescription]   = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return;
+    if (!name.trim()) return;
     setIsSubmitting(true);
-    await createGroup({ name, description });
+    const res = await createGroup({ name: name.trim(), description: description.trim() });
+    toast(res.success ? "Group created!" : (res.error ?? "Failed"), res.success ? "success" : "error");
     setIsSubmitting(false);
-    setIsOpen(false);
-    setName(""); setDescription("");
+    if (res.success) { setIsOpen(false); setName(""); setDescription(""); }
   };
 
   const handleDelete = async (id: string) => {
-    if(confirm("Delete group? This will fail if there are expenses linked to it.")) {
-      await deleteGroup(id);
-    }
+    setDeletingId(id);
+    const res = await deleteGroup(id);
+    toast(res.success ? "Group deleted." : (res.error ?? "Cannot delete — expenses are linked to it."), res.success ? "info" : "error");
+    setDeletingId(null);
   };
 
+  // Generate a stable color from group name
+  const colorForGroup = (name: string) =>
+    GROUP_COLORS[name.charCodeAt(0) % GROUP_COLORS.length];
+
   return (
-    <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto px-4 fade-in">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Expense Groups</h1>
-        <button 
-          onClick={() => setIsOpen(true)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-full font-medium transition-all shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
-        >
+    <div className="flex flex-col gap-6 fade-in">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Expense Groups</h1>
+          <p className="text-muted text-sm mt-1">Organise expenses into trips, projects, or periods</p>
+        </div>
+        <Button onClick={() => setIsOpen(true)}>
           <Plus className="w-4 h-4" />
           Add Group
-        </button>
+        </Button>
       </div>
 
-      <div className="bg-surface rounded-2xl ring-1 ring-border shadow-sm overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-border bg-surface-hover/50 text-xs uppercase tracking-wider text-foreground/60">
-              <th className="px-6 py-4 font-semibold">Name</th>
-              <th className="px-6 py-4 font-semibold">Description</th>
-              <th className="px-6 py-4 font-semibold text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {groups.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="px-6 py-12 text-center text-foreground/50">
-                  No groups found.
-                </td>
-              </tr>
-            ) : groups.map((group) => (
-              <tr key={group.id} className="hover:bg-surface-hover/50 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="font-semibold text-foreground">{group.name}</span>
-                </td>
-                <td className="px-6 py-4 text-foreground/70 text-sm">
-                  {group.description || "-"}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
-                  <button 
-                    onClick={() => handleDelete(group.id)}
-                    className="p-2 text-foreground/40 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                    title="Delete Group"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm fade-in">
-          <div className="bg-surface w-full max-w-sm rounded-3xl ring-1 ring-border shadow-2xl overflow-hidden flex flex-col">
-            <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-surface-hover/30">
-              <h2 className="text-xl font-bold tracking-tight">Add Group</h2>
-              <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-surface-hover rounded-full transition-colors text-foreground/50 hover:text-foreground">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground/80">Group Name</label>
-                <input 
-                  type="text" 
-                  value={name} 
-                  onChange={(e) => setName(e.target.value)} 
-                  required 
-                  placeholder="E.g., Trip to Paris"
-                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-foreground/30"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground/80">Description</label>
-                <textarea 
-                  value={description} 
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Optional details..."
-                  rows={3}
-                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-foreground/30 resize-none"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-border">
-                <button 
-                  type="button" 
-                  onClick={() => setIsOpen(false)}
-                  className="px-5 py-2.5 rounded-full font-medium text-sm text-foreground/70 hover:bg-surface-hover hover:text-foreground transition-colors"
+      {/* Card Grid */}
+      {groups.length === 0 ? (
+        <div className="card">
+          <EmptyState
+            icon={FolderGit2}
+            title="No groups yet"
+            description="Groups let you bundle expenses — perfect for trips, events, or projects."
+            action={<Button onClick={() => setIsOpen(true)}><Plus className="w-4 h-4" />Add Group</Button>}
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 stagger">
+          {groups.map((group) => {
+            const color = colorForGroup(group.name);
+            return (
+              <div key={group.id} className="card fade-in p-5 flex items-start gap-4 group/card">
+                {/* Icon */}
+                <div
+                  className="w-12 h-12 rounded-xl shrink-0 flex items-center justify-center"
+                  style={{ backgroundColor: `${color}20` }}
                 >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-full font-medium text-sm bg-primary hover:bg-primary-hover text-white transition-all shadow-md shadow-primary/20 disabled:opacity-50"
+                  <FolderGit2 className="w-5 h-5" style={{ color }} />
+                </div>
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-foreground truncate">{group.name}</p>
+                  {group.description ? (
+                    <p className="text-xs text-muted mt-1 line-clamp-2">{group.description}</p>
+                  ) : (
+                    <p className="text-xs text-muted/50 mt-1 italic">No description</p>
+                  )}
+                  <p className="text-xs text-muted mt-2">
+                    Created {new Date(group.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  </p>
+                </div>
+                {/* Delete */}
+                <button
+                  onClick={() => handleDelete(group.id)}
+                  disabled={deletingId === group.id}
+                  className="p-2 rounded-lg text-muted hover:text-red-500 hover:bg-red-500/10 transition-colors opacity-0 group-hover/card:opacity-100 shrink-0 disabled:opacity-40"
+                  title="Delete group"
                 >
-                  {isSubmitting ? "Saving..." : "Save Group"}
+                  {deletingId === group.id
+                    ? <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin block" />
+                    : <Trash2 className="w-4 h-4" />}
                 </button>
               </div>
-            </form>
-          </div>
+            );
+          })}
         </div>
       )}
+
+      {/* Modal */}
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="New Group" maxWidth="max-w-sm">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <Input
+            label="Group Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            placeholder="e.g. Trip to Paris"
+          />
+          <TextArea
+            label="Description (optional)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="What is this group for?"
+            rows={3}
+          />
+          <div className="flex justify-end gap-3 pt-2 border-t border-border">
+            <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
+            <Button type="submit" isLoading={isSubmitting}>Create</Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

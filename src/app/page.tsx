@@ -1,55 +1,163 @@
 import { getExpenses } from "@/actions/expenseActions";
+import { getCategories } from "@/actions/categoryActions";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { TrendingUp, DollarSign, Calendar, Tag } from "lucide-react";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
+import type { Expense } from "@/types";
+
+function formatCurrency(n: number) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+}
 
 export default async function Home() {
   const { userId } = await auth();
-  
-  if (!userId) {
-    redirect("/sign-in");
-  }
+  if (!userId) redirect("/sign-in");
 
-  const expenses = await getExpenses();
-  const totalAmount = expenses.reduce((sum: number, exp: any) => sum + exp.amount, 0);
+  const [expenses, categories] = await Promise.all([getExpenses(), getCategories()]);
 
-  // Group by category
-  const categoryTotals = expenses.reduce((acc, exp: any) => {
-    const catName = exp.category?.name || "Uncategorized";
-    acc[catName] = (acc[catName] || 0) + exp.amount;
+  // ── Stats ──────────────────────────────────────────────────────
+  const totalAmount = expenses.reduce((sum: number, e: Expense) => sum + e.amount, 0);
+
+  const now = new Date();
+  const thisMonthExpenses = expenses.filter((e: Expense) => {
+    const d = new Date(e.date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const thisMonthTotal = thisMonthExpenses.reduce((sum: number, e: Expense) => sum + e.amount, 0);
+
+  const avgPerDay = totalAmount / 30;
+
+  // Biggest category
+  const catTotals = expenses.reduce((acc: Record<string, { name: string; color: string; amount: number }>, e: Expense) => {
+    const key = e.categoryId;
+    if (!acc[key]) acc[key] = { name: e.category.name, color: e.category.color, amount: 0 };
+    acc[key].amount += e.amount;
     return acc;
-  }, {} as Record<string, number>);
+  }, {});
+  const topCat = Object.values(catTotals).sort((a, b) => b.amount - a.amount)[0];
 
-  const chartData = Object.keys(categoryTotals).map((name) => ({
-    name,
-    value: categoryTotals[name],
+  // ── Chart data ─────────────────────────────────────────────────
+  const pieData = Object.values(catTotals).map(({ name, amount }) => ({ name, value: amount }));
+
+  // Last 6 months bar chart
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const barMap: Record<string, number> = {};
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    barMap[`${monthNames[d.getMonth()]} ${d.getFullYear()}`] = 0;
+  }
+  expenses.forEach((e: Expense) => {
+    const d = new Date(e.date);
+    const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+    if (key in barMap) barMap[key] += e.amount;
+  });
+  const barData = Object.entries(barMap).map(([month, total]) => ({
+    month: month.split(" ")[0], // short month name
+    total: parseFloat(total.toFixed(2)),
   }));
 
+  // ── Stat cards config ──────────────────────────────────────────
+  const stats = [
+    {
+      label: "Total Spent",
+      value: formatCurrency(totalAmount),
+      subtext: `${expenses.length} expenses`,
+      icon: DollarSign,
+      color: "text-violet-500",
+      bg: "bg-violet-500/10",
+    },
+    {
+      label: "This Month",
+      value: formatCurrency(thisMonthTotal),
+      subtext: `${thisMonthExpenses.length} this month`,
+      icon: Calendar,
+      color: "text-cyan-500",
+      bg: "bg-cyan-500/10",
+    },
+    {
+      label: "Avg / Day",
+      value: formatCurrency(avgPerDay),
+      subtext: "last 30 days",
+      icon: TrendingUp,
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/10",
+    },
+    {
+      label: "Top Category",
+      value: topCat?.name ?? "—",
+      subtext: topCat ? formatCurrency(topCat.amount) : "No expenses yet",
+      icon: Tag,
+      color: "text-pink-500",
+      bg: "bg-pink-500/10",
+      colorDot: topCat?.color,
+    },
+  ];
+
   return (
-    <div className="flex flex-col gap-6 fade-in container mx-auto px-4 py-8 max-w-6xl">
-      <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-surface rounded-2xl p-6 shadow-sm ring-1 ring-border transition-all hover:shadow-md hover:ring-primary/50 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-primary/10 transition-colors" />
-          <p className="text-sm font-semibold text-foreground/60 uppercase tracking-wider mb-2">Total Expenses</p>
-          <h2 className="text-4xl font-bold text-foreground">
-            ${totalAmount.toFixed(2)}
-          </h2>
-        </div>
+    <div className="flex flex-col gap-8 fade-in">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted text-sm mt-1">Your financial overview at a glance</p>
       </div>
 
-      <div className="mt-8 bg-surface rounded-2xl p-6 shadow-sm ring-1 ring-border">
-        <h3 className="text-xl font-semibold mb-6 tracking-tight">Category Breakdown</h3>
-        {chartData.length > 0 ? (
-          <DashboardCharts data={chartData} />
-        ) : (
-          <div className="h-64 flex flex-col items-center justify-center bg-surface-hover rounded-xl border border-dashed border-border/50">
-            <p className="text-foreground/50 font-medium">No expenses recorded yet.</p>
-            <p className="text-sm text-foreground/40 mt-1">Add your first expense to see the breakdown.</p>
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 stagger">
+        {stats.map((stat) => (
+          <div
+            key={stat.label}
+            className="card fade-in stat-card p-5 flex flex-col gap-4 relative overflow-hidden group cursor-default"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-semibold text-muted uppercase tracking-wider">{stat.label}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  {stat.colorDot && (
+                    <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: stat.colorDot }} />
+                  )}
+                  <p className="text-2xl font-bold tracking-tight truncate max-w-[160px]">{stat.value}</p>
+                </div>
+                <p className="text-xs text-muted mt-1">{stat.subtext}</p>
+              </div>
+              <div className={`p-2.5 rounded-xl ${stat.bg} ${stat.color} shrink-0`}>
+                <stat.icon className="w-5 h-5" />
+              </div>
+            </div>
+            {/* decorative gradient blob */}
+            <div className={`absolute -bottom-4 -right-4 w-24 h-24 rounded-full blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500 ${stat.bg}`} />
           </div>
-        )}
+        ))}
       </div>
+
+      {/* Charts */}
+      <DashboardCharts pieData={pieData} barData={barData} />
+
+      {/* Recent Expenses */}
+      {expenses.length > 0 && (
+        <div className="card p-5">
+          <h3 className="text-sm font-semibold text-muted uppercase tracking-wider mb-4">Recent Expenses</h3>
+          <div className="divide-y divide-border">
+            {expenses.slice(0, 5).map((e: Expense) => (
+              <div key={e.id} className="flex items-center justify-between py-3 gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: `${e.category.color}20` }}
+                  >
+                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: e.category.color }} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm truncate">{e.title}</p>
+                    <p className="text-xs text-muted">{e.category.name} · {new Date(e.date).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                <span className="font-bold text-sm shrink-0">{formatCurrency(e.amount)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,143 +1,149 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, X } from "lucide-react";
+import { Plus, Trash2, Tags } from "lucide-react";
 import { createCategory, deleteCategory } from "@/actions/categoryActions";
+import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import EmptyState from "@/components/ui/EmptyState";
+import { useToast } from "@/components/ui/Toast";
+import type { Category } from "@/types";
 
-export default function CategoryClient({ categories }: { categories: any[] }) {
-  const [isOpen, setIsOpen] = useState(false);
+const PRESET_COLORS = [
+  "#7c3aed", "#06b6d4", "#10b981", "#f59e0b",
+  "#ef4444", "#ec4899", "#3b82f6", "#f97316",
+];
+
+export default function CategoryClient({ categories }: { categories: Category[] }) {
+  const { toast } = useToast();
+  const [isOpen, setIsOpen]         = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [name, setName] = useState("");
-  const [color, setColor] = useState("#a855f7"); // default modern purple
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [name, setName]             = useState("");
+  const [color, setColor]           = useState(PRESET_COLORS[0]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return;
+    if (!name.trim()) return;
     setIsSubmitting(true);
-    await createCategory({ name, color, icon: "tag" });
+    const res = await createCategory({ name: name.trim(), color, icon: "tag" });
+    toast(res.success ? "Category created!" : (res.error ?? "Failed"), res.success ? "success" : "error");
     setIsSubmitting(false);
-    setIsOpen(false);
-    setName(""); setColor("#a855f7");
+    if (res.success) { setIsOpen(false); setName(""); setColor(PRESET_COLORS[0]); }
   };
 
   const handleDelete = async (id: string) => {
-    if(confirm("Delete category? This will fail if there are expenses linked to it.")) {
-      await deleteCategory(id);
-    }
+    setDeletingId(id);
+    const res = await deleteCategory(id);
+    toast(res.success ? "Category deleted." : (res.error ?? "Cannot delete — expenses are linked to it."), res.success ? "info" : "error");
+    setDeletingId(null);
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto px-4 fade-in">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Categories</h1>
-        <button 
-          onClick={() => setIsOpen(true)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-full font-medium transition-all shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
-        >
+    <div className="flex flex-col gap-6 fade-in">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Categories</h1>
+          <p className="text-muted text-sm mt-1">{categories.length} categories</p>
+        </div>
+        <Button onClick={() => setIsOpen(true)}>
           <Plus className="w-4 h-4" />
           Add Category
-        </button>
+        </Button>
       </div>
 
-      <div className="bg-surface rounded-2xl ring-1 ring-border shadow-sm overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-border bg-surface-hover/50 text-xs uppercase tracking-wider text-foreground/60">
-              <th className="px-6 py-4 font-semibold">Name</th>
-              <th className="px-6 py-4 font-semibold">Color</th>
-              <th className="px-6 py-4 font-semibold text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {categories.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="px-6 py-12 text-center text-foreground/50">
-                  No categories found.
-                </td>
-              </tr>
-            ) : categories.map((cat) => (
-              <tr key={cat.id} className="hover:bg-surface-hover/50 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="font-semibold text-foreground">{cat.name}</span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-md shadow-sm ring-1 ring-black/5" style={{ backgroundColor: cat.color }} />
-                    <span className="text-sm text-foreground/60 uppercase font-mono">{cat.color}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
-                  <button 
-                    onClick={() => handleDelete(cat.id)}
-                    className="p-2 text-foreground/40 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                    title="Delete Category"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm fade-in">
-          <div className="bg-surface w-full max-w-sm rounded-3xl ring-1 ring-border shadow-2xl overflow-hidden flex flex-col">
-            <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-surface-hover/30">
-              <h2 className="text-xl font-bold tracking-tight">Add Category</h2>
-              <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-surface-hover rounded-full transition-colors text-foreground/50 hover:text-foreground">
-                <X className="w-5 h-5" />
+      {/* Card Grid */}
+      {categories.length === 0 ? (
+        <div className="card">
+          <EmptyState
+            icon={Tags}
+            title="No categories yet"
+            description="Create your first category to start organizing expenses."
+            action={<Button onClick={() => setIsOpen(true)}><Plus className="w-4 h-4" />Add Category</Button>}
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 stagger">
+          {categories.map((cat) => (
+            <div key={cat.id} className="card fade-in p-5 flex items-center gap-4 group">
+              {/* Color swatch */}
+              <div
+                className="w-12 h-12 rounded-xl shrink-0 flex items-center justify-center shadow-sm"
+                style={{ backgroundColor: `${cat.color}20` }}
+              >
+                <div className="w-5 h-5 rounded-full" style={{ backgroundColor: cat.color }} />
+              </div>
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground truncate">{cat.name}</p>
+                <p className="text-xs font-mono text-muted uppercase mt-0.5">{cat.color}</p>
+              </div>
+              {/* Delete */}
+              <button
+                onClick={() => handleDelete(cat.id)}
+                disabled={deletingId === cat.id}
+                className="p-2 rounded-lg text-muted hover:text-red-500 hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100 shrink-0 disabled:opacity-40"
+                title="Delete category"
+              >
+                {deletingId === cat.id
+                  ? <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin block" />
+                  : <Trash2 className="w-4 h-4" />}
               </button>
             </div>
-            
-            <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground/80">Name</label>
-                <input 
-                  type="text" 
-                  value={name} 
-                  onChange={(e) => setName(e.target.value)} 
-                  required 
-                  placeholder="E.g., Utilities"
-                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-foreground/30"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground/80">Color Theme</label>
-                <div className="flex items-center gap-3 bg-background border border-border rounded-xl p-2 focus-within:ring-2 focus-within:ring-primary/50 transition-all">
-                  <input 
-                    type="color" 
-                    value={color} 
-                    onChange={(e) => setColor(e.target.value)}
-                    className="w-10 h-10 rounded-lg cursor-pointer border-none bg-transparent p-0"
-                  />
-                  <span className="text-sm font-mono text-foreground/60 uppercase">{color}</span>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-border">
-                <button 
-                  type="button" 
-                  onClick={() => setIsOpen(false)}
-                  className="px-5 py-2.5 rounded-full font-medium text-sm text-foreground/70 hover:bg-surface-hover hover:text-foreground transition-colors"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-full font-medium text-sm bg-primary hover:bg-primary-hover text-white transition-all shadow-md shadow-primary/20 disabled:opacity-50"
-                >
-                  {isSubmitting ? "Saving..." : "Save Category"}
-                </button>
-              </div>
-            </form>
-          </div>
+          ))}
         </div>
       )}
+
+      {/* Modal */}
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="New Category" maxWidth="max-w-sm">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <Input
+            label="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            placeholder="e.g. Utilities"
+          />
+
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-foreground/80">Color</label>
+            {/* Preset palette */}
+            <div className="flex gap-2 flex-wrap">
+              {PRESET_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setColor(c)}
+                  className="w-8 h-8 rounded-full transition-transform hover:scale-110 ring-offset-2 ring-offset-surface"
+                  style={{
+                    backgroundColor: c,
+                    boxShadow: color === c ? `0 0 0 3px ${c}` : undefined,
+                    outline: color === c ? "2px solid white" : undefined,
+                    outlineOffset: color === c ? "2px" : undefined,
+                  }}
+                />
+              ))}
+            </div>
+            {/* Custom picker */}
+            <div className="flex items-center gap-3 input-base p-2">
+              <input
+                type="color"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                className="w-8 h-8 rounded-md cursor-pointer border-none bg-transparent p-0 shrink-0"
+              />
+              <span className="text-sm font-mono text-muted uppercase">{color}</span>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2 border-t border-border">
+            <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
+            <Button type="submit" isLoading={isSubmitting}>Create</Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
