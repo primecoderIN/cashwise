@@ -11,10 +11,10 @@ export default async function Home() {
   }
 
   const expenses = await getExpenses();
-  const totalAmount = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const totalAmount = expenses.reduce((sum: number, exp: any) => sum + exp.amount, 0);
 
   // Group by category
-  const categoryTotals = expenses.reduce((acc, exp) => {
+  const categoryTotals = expenses.reduce((acc, exp: any) => {
     const catName = exp.category?.name || "Uncategorized";
     acc[catName] = (acc[catName] || 0) + exp.amount;
     return acc;
