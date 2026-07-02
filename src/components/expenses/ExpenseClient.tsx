@@ -160,22 +160,22 @@ export default function ExpenseClient({ expenses, categories, groups }: Props) {
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
           <input
-            className="input-base pl-9"
+            className="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
             placeholder="Search expenses..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <select
-          className="input-base w-full sm:w-44 appearance-none cursor-pointer"
+          className="w-full sm:w-44 bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all appearance-none cursor-pointer"
           value={filterCat}
           onChange={(e) => setFilterCat(e.target.value)}
         >
           <option value="all">All Categories</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        <input type="date" className="input-base w-full sm:w-40" value={filterFrom} onChange={(e) => setFilterFrom(e.target.value)} />
-        <input type="date" className="input-base w-full sm:w-40" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} />
+        <input type="date" className="w-full sm:w-40 bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all" value={filterFrom} onChange={(e) => setFilterFrom(e.target.value)} />
+        <input type="date" className="w-full sm:w-40 bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} />
         {(search || filterCat !== "all" || filterFrom || filterTo) && (
           <Button variant="ghost" size="sm" onClick={() => { setSearch(""); setFilterCat("all"); setFilterFrom(""); setFilterTo(""); }}>
             <X className="w-4 h-4" /> Clear

@@ -6,6 +6,9 @@ type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   icon?: React.ReactNode;
 };
 
+const inputClass =
+  "w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all duration-200";
+
 const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, icon, className = "", id, ...props }, ref) => {
     const inputId = id || label?.toLowerCase().replace(/\s+/g, "-");
@@ -25,7 +28,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             id={inputId}
-            className={`input-base ${icon ? "pl-9" : ""} ${error ? "border-red-500 focus:border-red-500" : ""} ${className}`}
+            className={`${inputClass} ${icon ? "pl-9" : ""} ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500/30" : ""} ${className}`}
             {...props}
           />
         </div>
@@ -54,7 +57,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
         <textarea
           ref={ref}
           id={inputId}
-          className={`input-base resize-none ${className}`}
+          className={`w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all duration-200 resize-none ${className}`}
           {...props}
         />
       </div>
@@ -81,7 +84,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           id={inputId}
-          className={`input-base appearance-none cursor-pointer ${className}`}
+          className={`w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all duration-200 appearance-none cursor-pointer ${className}`}
           {...props}
         >
           {children}
