@@ -29,13 +29,14 @@ export default async function Home() {
   const avgPerDay = totalAmount / 30;
 
   // Biggest category
-  const catTotals = expenses.reduce((acc: Record<string, { name: string; color: string; amount: number }>, e: Expense) => {
+  type CatTotal = { name: string; color: string; amount: number };
+  const catTotals = expenses.reduce((acc: Record<string, CatTotal>, e: Expense) => {
     const key = e.categoryId;
     if (!acc[key]) acc[key] = { name: e.category.name, color: e.category.color, amount: 0 };
     acc[key].amount += e.amount;
     return acc;
-  }, {});
-  const topCat = Object.values(catTotals).sort((a, b) => b.amount - a.amount)[0];
+  }, {} as Record<string, CatTotal>);
+  const topCat = (Object.values(catTotals) as CatTotal[]).sort((a, b) => b.amount - a.amount)[0];
 
   // ── Chart data ─────────────────────────────────────────────────
   const pieData = Object.values(catTotals).map(({ name, amount }) => ({ name, value: amount }));
