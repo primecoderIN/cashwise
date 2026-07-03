@@ -5,6 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from "recharts";
 import { useTheme } from "next-themes";
+import { Card } from "@/components/ui/card";
 
 const PIE_COLORS = ["#7c3aed", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#8b5cf6"];
 
@@ -20,27 +21,27 @@ type Props = {
 const CustomTooltipPie = ({ active, payload }: any) => {
   if (active && payload?.length) {
     return (
-      <div className="bg-surface border border-border rounded-xl px-3 py-2 shadow-lg text-sm">
+      <div className="bg-background border border-border rounded-xl px-3 py-2 shadow-lg text-sm">
         <p className="font-semibold text-foreground">{payload[0].name}</p>
-        <p className="text-muted">${Number(payload[0].value).toFixed(2)}</p>
+        <p className="text-muted-foreground">${Number(payload[0].value).toFixed(2)}</p>
       </div>
     );
   }
   return null;
-};
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomTooltipBar = ({ active, payload, label }: any) => {
   if (active && payload?.length) {
     return (
-      <div className="bg-surface border border-border rounded-xl px-3 py-2 shadow-lg text-sm">
+      <div className="bg-background border border-border rounded-xl px-3 py-2 shadow-lg text-sm">
         <p className="font-semibold text-foreground">{label}</p>
-        <p className="text-muted">${Number(payload[0].value).toFixed(2)}</p>
+        <p className="text-muted-foreground">${Number(payload[0].value).toFixed(2)}</p>
       </div>
     );
   }
   return null;
-};
+}
 
 export default function DashboardCharts({ pieData, barData }: Props) {
   const { theme } = useTheme();
@@ -50,10 +51,10 @@ export default function DashboardCharts({ pieData, barData }: Props) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Monthly Spend Bar Chart */}
-      <div className="card p-5">
-        <h3 className="text-sm font-semibold text-muted uppercase tracking-wider mb-4">Monthly Spend</h3>
+      <Card className="p-5">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Monthly Spend</h3>
         {barData.length === 0 ? (
-          <div className="h-52 flex items-center justify-center text-muted text-sm">No data yet</div>
+          <div className="h-52 flex items-center justify-center text-muted-foreground text-sm">No data yet</div>
         ) : (
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={barData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
@@ -65,13 +66,13 @@ export default function DashboardCharts({ pieData, barData }: Props) {
             </BarChart>
           </ResponsiveContainer>
         )}
-      </div>
+      </Card>
 
       {/* Category Pie Chart */}
-      <div className="card p-5">
-        <h3 className="text-sm font-semibold text-muted uppercase tracking-wider mb-4">By Category</h3>
+      <Card className="p-5">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">By Category</h3>
         {pieData.length === 0 ? (
-          <div className="h-52 flex items-center justify-center text-muted text-sm">No data yet</div>
+          <div className="h-52 flex items-center justify-center text-muted-foreground text-sm">No data yet</div>
         ) : (
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
@@ -97,7 +98,7 @@ export default function DashboardCharts({ pieData, barData }: Props) {
             </PieChart>
           </ResponsiveContainer>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Geist } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "./providers";
 import AppNavbar from "@/components/layout/AppNavbar";
+import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,7 +24,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
+      <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
         <body className={`${inter.variable} min-h-screen flex flex-col bg-background antialiased`}>
           <Providers>
             <AppNavbar />
@@ -29,6 +32,7 @@ export default function RootLayout({
               {children}
             </main>
           </Providers>
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>

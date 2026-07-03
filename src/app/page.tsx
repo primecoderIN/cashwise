@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { TrendingUp, DollarSign, Calendar, Tag } from "lucide-react";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
+import { Card } from "@/components/ui/card";
 import type { Expense } from "@/types";
 
 function formatCurrency(n: number) {
@@ -99,26 +100,26 @@ export default async function Home() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted text-sm mt-1">Your financial overview at a glance</p>
+        <p className="text-muted-foreground text-sm mt-1">Your financial overview at a glance</p>
       </div>
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 stagger">
         {stats.map((stat) => (
-          <div
+          <Card
             key={stat.label}
-            className="card fade-in stat-card p-5 flex flex-col gap-4 relative overflow-hidden group cursor-default"
+            className="p-5 flex flex-col gap-4 relative overflow-hidden group cursor-default"
           >
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs font-semibold text-muted uppercase tracking-wider">{stat.label}</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{stat.label}</p>
                 <div className="flex items-center gap-2 mt-2">
                   {stat.colorDot && (
                     <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: stat.colorDot }} />
                   )}
                   <p className="text-2xl font-bold tracking-tight truncate max-w-[160px]">{stat.value}</p>
                 </div>
-                <p className="text-xs text-muted mt-1">{stat.subtext}</p>
+                <p className="text-xs text-muted-foreground mt-1">{stat.subtext}</p>
               </div>
               <div className={`p-2.5 rounded-xl ${stat.bg} ${stat.color} shrink-0`}>
                 <stat.icon className="w-5 h-5" />
@@ -126,7 +127,7 @@ export default async function Home() {
             </div>
             {/* decorative gradient blob */}
             <div className={`absolute -bottom-4 -right-4 w-24 h-24 rounded-full blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500 ${stat.bg}`} />
-          </div>
+          </Card>
         ))}
       </div>
 
@@ -135,8 +136,8 @@ export default async function Home() {
 
       {/* Recent Expenses */}
       {expenses.length > 0 && (
-        <div className="card p-5">
-          <h3 className="text-sm font-semibold text-muted uppercase tracking-wider mb-4">Recent Expenses</h3>
+        <Card className="p-5">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Recent Expenses</h3>
           <div className="divide-y divide-border">
             {expenses.slice(0, 5).map((e: Expense) => (
               <div key={e.id} className="flex items-center justify-between py-3 gap-4">
@@ -149,14 +150,14 @@ export default async function Home() {
                   </div>
                   <div className="min-w-0">
                     <p className="font-medium text-sm truncate">{e.title}</p>
-                    <p className="text-xs text-muted">{e.category.name} · {new Date(e.date).toLocaleDateString()}</p>
+                    <p className="text-xs text-muted-foreground">{e.category.name} · {new Date(e.date).toLocaleDateString()}</p>
                   </div>
                 </div>
                 <span className="font-bold text-sm shrink-0">{formatCurrency(e.amount)}</span>
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );
