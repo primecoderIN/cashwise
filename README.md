@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CashWise
+
+CashWise is a modern personal finance tracking application built as a Monorepo. It features a React (Vite) frontend with a sleek UI built using Tailwind CSS and Recharts, and a powerful NestJS backend utilizing Prisma 7 as its ORM.
+
+## Architecture
+
+This project is organized as an npm workspaces monorepo with two main applications:
+
+### 1. Frontend (`apps/frontend`)
+- **Framework:** React + Vite
+- **Styling:** Tailwind CSS (v4) with standard classes, prioritizing a vibrant green primary theme (`#16A34A`), modern typography, and clean layouts.
+- **Components:** Fully responsive components including a dynamic Dashboard, Expense tracker, Categories, and Groups.
+- **Forms & Validation:** React Hook Form integrated with Zod.
+- **Charts:** Recharts for dynamic visual statistics.
+
+### 2. Backend (`apps/backend`)
+- **Framework:** NestJS
+- **Database ORM:** Prisma 7 using the explicitly configured `@prisma/adapter-pg` driver adapter.
+- **Database:** PostgreSQL
+- **API Documentation:** Swagger UI built-in.
+- **Static Serving:** In production mode, the NestJS backend statically serves the compiled frontend assets from its `public` directory, running both the API and the React application on a single port.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- Node.js (v24+ recommended)
+- PostgreSQL database
+
+### Installation
+
+1. **Clone the repository** and install dependencies at the root level (this will install dependencies for both the frontend and backend using npm workspaces):
+   ```bash
+   npm install
+   ```
+
+2. **Environment Variables:**
+   Create a `.env` file in the root directory (or inside `apps/backend`) and provide your database connection URL:
+   ```env
+   DATABASE_URL="postgresql://user:password@localhost:5432/cashwise"
+   ```
+
+3. **Database Setup:**
+   Run the Prisma migrations to apply the schema to your database:
+   ```bash
+   cd apps/backend
+   npx prisma migrate dev
+   npx prisma generate
+   cd ../..
+   ```
+
+## Development
+
+To run both the frontend (Vite) and backend (NestJS) servers concurrently in development mode with hot-reloading:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
+- **Frontend Development Server:** Typically available on `http://localhost:5173`
+- **Backend API Server:** Available on `http://localhost:3000`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Production Build & Start
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The production build script compiles the React frontend, copies the static assets into the backend's `public` directory, and then compiles the NestJS backend.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Build the full project:**
+   ```bash
+   npm run build
+   ```
 
-## Learn More
+2. **Start the production server:**
+   ```bash
+   npm run start:prod
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+The application will now be running entirely from the backend server!
+- **Frontend App:** [http://localhost:3000](http://localhost:3000)
+- **API Endpoints:** `/api/*`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Documentation (Swagger)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The backend exposes a fully auto-generated Swagger UI containing documentation for all the API endpoints.
 
-## Deploy on Vercel
+When the backend server is running (either in development or production mode), you can access the Swagger documentation at:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+👉 **[http://localhost:3000/api](http://localhost:3000/api)**
