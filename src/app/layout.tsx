@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "./providers";
 import AppNavbar from "@/components/layout/AppNavbar";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "CashWise — Smart Expense Tracker",
@@ -15,7 +22,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className="min-h-screen flex flex-col bg-background antialiased">
+        <body className={`${inter.variable} min-h-screen flex flex-col bg-background antialiased`}>
           <Providers>
             <AppNavbar />
             <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-8 md:px-8">

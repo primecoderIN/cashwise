@@ -1,5 +1,4 @@
 import { getExpenses } from "@/actions/expenseActions";
-import { getCategories } from "@/actions/categoryActions";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { TrendingUp, DollarSign, Calendar, Tag } from "lucide-react";
@@ -14,7 +13,7 @@ export default async function Home() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const [expenses, categories] = await Promise.all([getExpenses(), getCategories()]);
+  const expenses = await getExpenses();
 
   // ── Stats ──────────────────────────────────────────────────────
   const totalAmount = expenses.reduce((sum: number, e: Expense) => sum + e.amount, 0);
@@ -39,7 +38,7 @@ export default async function Home() {
   const topCat = (Object.values(catTotals) as CatTotal[]).sort((a, b) => b.amount - a.amount)[0];
 
   // ── Chart data ─────────────────────────────────────────────────
-  const pieData = Object.values(catTotals).map(({ name, amount }) => ({ name, value: amount }));
+  const pieData = (Object.values(catTotals) as CatTotal[]).map(({ name, amount }) => ({ name, value: amount }));
 
   // Last 6 months bar chart
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];

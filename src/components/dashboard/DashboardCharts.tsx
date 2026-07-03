@@ -16,6 +16,7 @@ type Props = {
   barData: BarData[];
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomTooltipPie = ({ active, payload }: any) => {
   if (active && payload?.length) {
     return (
@@ -28,6 +29,7 @@ const CustomTooltipPie = ({ active, payload }: any) => {
   return null;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomTooltipBar = ({ active, payload, label }: any) => {
   if (active && payload?.length) {
     return (

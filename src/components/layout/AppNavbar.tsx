@@ -21,9 +21,11 @@ export default function AppNavbar() {
   const [mounted, setMounted]     = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMounted(true); }, []);
 
   // Close mobile menu on route change
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   return (
