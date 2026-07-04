@@ -5,11 +5,11 @@ export declare class CategoriesService {
     getCategories(userId: string): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
-        updatedAt: Date;
         color: string;
         icon: string;
         userId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }[]>;
     createCategory(userId: string, data: {
         name: string;
@@ -20,11 +20,11 @@ export declare class CategoriesService {
         category: {
             id: string;
             name: string;
-            createdAt: Date;
-            updatedAt: Date;
             color: string;
             icon: string;
             userId: string;
+            createdAt: Date;
+            updatedAt: Date;
         };
     }>;
     deleteCategory(userId: string, categoryId: string): Promise<{

@@ -29,7 +29,12 @@ export class CategoriesService {
   async createCategory(userId: string, data: { name: string; color: string; icon: string }) {
     try {
       const category = await this.prisma.category.create({
-        data: { ...data, userId },
+        data: { 
+          name: data.name,
+          color: data.color,
+          icon: data.icon,
+          userId 
+        },
       });
       return { success: true, category };
     } catch (error) {

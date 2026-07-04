@@ -26,7 +26,12 @@ let CategoriesService = class CategoriesService {
     async createCategory(userId, data) {
         try {
             const category = await this.prisma.category.create({
-                data: { ...data, userId },
+                data: {
+                    name: data.name,
+                    color: data.color,
+                    icon: data.icon,
+                    userId
+                },
             });
             return { success: true, category };
         }
