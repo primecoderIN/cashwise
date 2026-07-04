@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Wallet, TrendingUp, FolderGit2, Tags, Receipt, Activity, CreditCard, PieChart as PieChartIcon } from "lucide-react";
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -194,47 +196,47 @@ export default function DashboardClient() {
               <button className="text-sm font-semibold text-primary hover:text-primary-hover">View All</button>
             </div>
             <div className="w-full">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-100">
-                  <tr>
-                    <th className="px-5 py-3 font-medium">Date</th>
-                    <th className="px-5 py-3 font-medium">Description</th>
-                    <th className="px-5 py-3 font-medium">Group</th>
-                    <th className="px-5 py-3 font-medium">Category</th>
-                    <th className="px-5 py-3 font-medium text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Group</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {recent?.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="px-5 py-8 text-center text-slate-500">No recent expenses.</td>
-                    </tr>
+                    <TableRow>
+                      <TableCell colSpan={5} className="h-24 text-center">No recent expenses.</TableCell>
+                    </TableRow>
                   ) : (
                     recent?.slice(0, 5).map((expense: any) => (
-                      <tr key={expense.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors">
-                        <td className="px-5 py-4 text-slate-500 whitespace-nowrap">
+                      <TableRow key={expense.id}>
+                        <TableCell className="whitespace-nowrap">
                           {new Date(expense.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </td>
-                        <td className="px-5 py-4 font-medium text-slate-900 flex items-center gap-3">
+                        </TableCell>
+                        <TableCell className="font-medium flex items-center gap-3">
                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs" style={{ backgroundColor: expense.category.color || '#16a34a' }}>
                              {expense.category.name.charAt(0)}
                            </div>
                            {expense.title}
-                        </td>
-                        <td className="px-5 py-4">
+                        </TableCell>
+                        <TableCell>
                            <span className="px-2.5 py-1 bg-green-50 text-green-700 rounded-md text-xs font-semibold">
                              {expense.group?.name || 'General'}
                            </span>
-                        </td>
-                        <td className="px-5 py-4 text-slate-500">{expense.category.name}</td>
-                        <td className="px-5 py-4 text-right font-semibold text-red-500 whitespace-nowrap">
+                        </TableCell>
+                        <TableCell>{expense.category.name}</TableCell>
+                        <TableCell className="text-right font-semibold text-red-500 whitespace-nowrap">
                           - ₹ {expense.amount.toLocaleString()}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))
                   )}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           </Card>
         </div>
@@ -244,9 +246,14 @@ export default function DashboardClient() {
           <Card className="p-5 shadow-sm border-slate-200 bg-white">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-[15px] font-bold text-slate-900">Quick Filters</h3>
-              <select className="text-xs bg-slate-50 border border-slate-200 rounded-md px-2 py-1 outline-none text-slate-700 font-medium cursor-pointer">
-                <option>All Groups</option>
-              </select>
+              <Select defaultValue="all">
+                <SelectTrigger className="h-8 text-xs bg-slate-50 border-slate-200 w-[120px]">
+                  <SelectValue placeholder="Select group" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Groups</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-4">
@@ -298,9 +305,14 @@ export default function DashboardClient() {
           <Card className="p-5 shadow-sm border-slate-200 bg-white">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-[15px] font-bold text-slate-900">Top Categories</h3>
-              <select className="text-xs bg-slate-50 border border-slate-200 rounded-md px-2 py-1 outline-none text-slate-700 font-medium cursor-pointer">
-                <option>All Groups</option>
-              </select>
+              <Select defaultValue="all">
+                <SelectTrigger className="h-8 text-xs bg-slate-50 border-slate-200 w-[120px]">
+                  <SelectValue placeholder="Select group" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Groups</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-4">
                {[
@@ -327,9 +339,14 @@ export default function DashboardClient() {
           <Card className="p-5 shadow-sm border-slate-200 bg-white">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-[15px] font-bold text-slate-900">Budget Summary</h3>
-              <select className="text-xs bg-slate-50 border border-slate-200 rounded-md px-2 py-1 outline-none text-slate-700 font-medium cursor-pointer">
-                <option>This Month</option>
-              </select>
+              <Select defaultValue="month">
+                <SelectTrigger className="h-8 text-xs bg-slate-50 border-slate-200 w-[120px]">
+                  <SelectValue placeholder="Select period" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="month">This Month</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">

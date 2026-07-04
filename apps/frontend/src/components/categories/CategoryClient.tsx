@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 export default function CategoryClient() {
@@ -98,25 +100,30 @@ export default function CategoryClient() {
                      onChange={e => setSearch(e.target.value)}
                    />
                  </div>
-                 <select className="h-9 px-3 bg-slate-50 border-none rounded-lg text-xs font-medium outline-none cursor-pointer text-slate-600">
-                   <option>All Groups</option>
-                 </select>
+                 <Select defaultValue="all">
+                   <SelectTrigger className="h-9 w-[120px] bg-slate-50 border-none rounded-lg text-xs font-medium">
+                     <SelectValue placeholder="All Groups" />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="all">All Groups</SelectItem>
+                   </SelectContent>
+                 </Select>
                </div>
              </div>
              
              <div className="w-full overflow-x-auto">
-               <table className="w-full text-sm text-left">
-                 <thead className="text-[11px] text-slate-500 uppercase bg-slate-50/50">
-                   <tr>
-                     <th className="px-5 py-4 font-semibold">Category</th>
-                     <th className="px-5 py-4 font-semibold">Group</th>
-                     <th className="px-5 py-4 font-semibold">Total Expenses</th>
-                     <th className="px-5 py-4 font-semibold">% of Total</th>
-                     <th className="px-5 py-4 font-semibold text-center">Transactions</th>
-                     <th className="px-5 py-4 font-semibold text-center">Actions</th>
-                   </tr>
-                 </thead>
-                 <tbody>
+               <Table>
+                 <TableHeader className="bg-slate-50/50">
+                   <TableRow>
+                     <TableHead>Category</TableHead>
+                     <TableHead>Group</TableHead>
+                     <TableHead>Total Expenses</TableHead>
+                     <TableHead>% of Total</TableHead>
+                     <TableHead className="text-center">Transactions</TableHead>
+                     <TableHead className="text-center">Actions</TableHead>
+                   </TableRow>
+                 </TableHeader>
+                 <TableBody>
                    {[
                      { name: 'Flights', group: 'Travel', amt: '4,850.00', pct: '20.6%', txn: 6, icon: Plane, color: 'text-blue-600', bg: 'bg-blue-50', badge: 'text-emerald-700 bg-emerald-50' },
                      { name: 'Dining Out', group: 'Food', amt: '3,900.00', pct: '16.6%', txn: 8, icon: Utensils, color: 'text-orange-600', bg: 'bg-orange-50', badge: 'text-orange-700 bg-orange-50' },
@@ -126,36 +133,36 @@ export default function CategoryClient() {
                      { name: 'Rent', group: 'Bills', amt: '1,500.00', pct: '6.4%', txn: 1, icon: Home, color: 'text-emerald-600', bg: 'bg-emerald-50', badge: 'text-blue-700 bg-blue-50' },
                      { name: 'Movies', group: 'Entertainment', amt: '1,450.00', pct: '6.2%', txn: 4, icon: Film, color: 'text-pink-600', bg: 'bg-pink-50', badge: 'text-amber-700 bg-amber-50' },
                    ].map(c => (
-                     <tr key={c.name} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                       <td className="px-5 py-4 font-bold text-slate-900 flex items-center gap-3">
+                     <TableRow key={c.name}>
+                       <TableCell className="font-bold text-slate-900 flex items-center gap-3">
                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${c.bg}`}>
                            <c.icon className={`w-4 h-4 ${c.color}`} />
                          </div>
                          {c.name}
-                       </td>
-                       <td className="px-5 py-4">
+                       </TableCell>
+                       <TableCell>
                          <Badge className={`border-none ${c.badge}`}>{c.group}</Badge>
-                       </td>
-                       <td className="px-5 py-4 font-bold text-slate-900">₹ {c.amt}</td>
-                       <td className="px-5 py-4 text-slate-600 font-medium">{c.pct}</td>
-                       <td className="px-5 py-4 text-slate-600 font-medium text-center">{c.txn}</td>
-                       <td className="px-5 py-4 text-center">
+                       </TableCell>
+                       <TableCell className="font-bold text-slate-900">₹ {c.amt}</TableCell>
+                       <TableCell className="text-slate-600 font-medium">{c.pct}</TableCell>
+                       <TableCell className="text-slate-600 font-medium text-center">{c.txn}</TableCell>
+                       <TableCell className="text-center">
                          <div className="flex items-center justify-center gap-1">
                            <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-200 transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
                            <button className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                          </div>
-                       </td>
-                     </tr>
+                       </TableCell>
+                     </TableRow>
                    ))}
-                   <tr className="bg-slate-50/50">
-                     <td className="px-5 py-4 font-bold text-slate-900" colSpan={2}>Total</td>
-                     <td className="px-5 py-4 font-bold text-slate-900">₹ 23,550.00</td>
-                     <td className="px-5 py-4 font-bold text-slate-900">100%</td>
-                     <td className="px-5 py-4 font-bold text-slate-900 text-center">52</td>
-                     <td className="px-5 py-4"></td>
-                   </tr>
-                 </tbody>
-               </table>
+                   <TableRow className="bg-slate-50/50">
+                     <TableCell className="font-bold text-slate-900" colSpan={2}>Total</TableCell>
+                     <TableCell className="font-bold text-slate-900">₹ 23,550.00</TableCell>
+                     <TableCell className="font-bold text-slate-900">100%</TableCell>
+                     <TableCell className="font-bold text-slate-900 text-center">52</TableCell>
+                     <TableCell></TableCell>
+                   </TableRow>
+                 </TableBody>
+               </Table>
              </div>
              
              <div className="p-4 border-t border-slate-100 flex items-center justify-between text-[13px] text-slate-500 bg-slate-50/50">
@@ -187,9 +194,14 @@ export default function CategoryClient() {
                
                <div className="flex flex-col gap-1.5">
                  <label className="text-xs font-semibold text-slate-700">Select Group</label>
-                 <select className="h-10 px-3 bg-white border border-slate-200 rounded-md text-sm font-medium outline-none focus:border-primary shadow-sm text-slate-600">
-                   <option>Choose a group</option>
-                 </select>
+                 <Select defaultValue="none">
+                   <SelectTrigger className="h-10 w-full bg-white border-slate-200 rounded-md text-sm font-medium shadow-sm text-slate-600">
+                     <SelectValue placeholder="Choose a group" />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="none">Choose a group</SelectItem>
+                   </SelectContent>
+                 </Select>
                </div>
 
                <div className="flex flex-col gap-2 pt-2">
@@ -227,9 +239,14 @@ export default function CategoryClient() {
            <Card className="p-5 shadow-sm border-slate-200 bg-white">
              <div className="flex items-center justify-between mb-6">
                <h3 className="text-[15px] font-bold text-slate-900">Category Summary</h3>
-               <select className="text-[11px] bg-slate-50 border border-slate-200 rounded-md px-2 py-1 outline-none text-slate-600 font-semibold cursor-pointer">
-                 <option>This Month</option>
-               </select>
+               <Select defaultValue="month">
+                 <SelectTrigger className="h-7 w-[100px] text-[11px] bg-slate-50 border-slate-200 rounded-md font-semibold">
+                   <SelectValue placeholder="Period" />
+                 </SelectTrigger>
+                 <SelectContent>
+                   <SelectItem value="month">This Month</SelectItem>
+                 </SelectContent>
+               </Select>
              </div>
              
              <div className="flex gap-4 items-center">

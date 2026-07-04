@@ -11,7 +11,10 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Note: these should ideally come from shared types
 export type CategoryLocal = { id: string; name: string; color: string; icon: string; createdAt: Date };
@@ -48,7 +51,7 @@ export default function ExpenseClient() {
 
   const COLORS = ['#16a34a', '#f59e0b', '#3b82f6', '#ec4899', '#8b5cf6', '#64748b'];
 
-  const { register, handleSubmit, reset } = useForm({
+  const { register, handleSubmit, reset, control } = useForm({
     defaultValues: {
       title: "",
       amount: 0,
@@ -92,26 +95,39 @@ export default function ExpenseClient() {
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-semibold text-slate-900">Group</label>
           <div className="relative">
-             <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 bg-slate-100 rounded-sm flex items-center justify-center">
+             <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 bg-slate-100 rounded-sm flex items-center justify-center z-10">
                <FolderGit2 className="w-3 h-3" />
              </div>
-             <select {...register("groupId")} className="h-11 w-full pl-9 pr-3 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-primary shadow-sm text-slate-700 appearance-none">
-               <option value="">Select group (optional)</option>
-               {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-             </select>
+             <Controller name="groupId" control={control} render={({field}) => (
+               <Select onValueChange={field.onChange} defaultValue={field.value}>
+                 <SelectTrigger className="h-11 w-full pl-9 pr-3 bg-white border-slate-200 rounded-xl text-sm font-medium shadow-sm text-slate-700">
+                   <SelectValue placeholder="Select group (optional)" />
+                 </SelectTrigger>
+                 <SelectContent>
+                   <SelectItem value="none">Select group (optional)</SelectItem>
+                   {groups.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
+                 </SelectContent>
+               </Select>
+             )} />
           </div>
           <p className="text-[10px] text-slate-400 mt-0.5 font-medium leading-tight">If no group is selected, expense will be added to 'Other' group.</p>
         </div>
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-semibold text-slate-900">Category <span className="text-red-500">*</span></label>
           <div className="relative">
-             <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 bg-slate-100 rounded-sm flex items-center justify-center">
+             <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 bg-slate-100 rounded-sm flex items-center justify-center z-10">
                <LayoutGrid className="w-3 h-3" />
              </div>
-             <select {...register("categoryId")} className="h-11 w-full pl-9 pr-3 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-primary shadow-sm text-slate-700 appearance-none">
-               <option value="" disabled>Select category</option>
-               {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-             </select>
+             <Controller name="categoryId" control={control} render={({field}) => (
+               <Select onValueChange={field.onChange} defaultValue={field.value}>
+                 <SelectTrigger className="h-11 w-full pl-9 pr-3 bg-white border-slate-200 rounded-xl text-sm font-medium shadow-sm text-slate-700">
+                   <SelectValue placeholder="Select category" />
+                 </SelectTrigger>
+                 <SelectContent>
+                   {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                 </SelectContent>
+               </Select>
+             )} />
           </div>
         </div>
       </div>
@@ -119,15 +135,25 @@ export default function ExpenseClient() {
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-semibold text-slate-900">Payment Mode <span className="text-red-500">*</span></label>
-          <select className="h-11 w-full px-3 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-primary shadow-sm text-slate-700 appearance-none">
-            <option>Select payment mode</option>
-          </select>
+          <Select defaultValue="none">
+            <SelectTrigger className="h-11 w-full bg-white border-slate-200 rounded-xl text-sm font-medium shadow-sm text-slate-700">
+              <SelectValue placeholder="Select payment mode" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Select payment mode</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-semibold text-slate-900">Account <span className="text-red-500">*</span></label>
-          <select className="h-11 w-full px-3 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-primary shadow-sm text-slate-700 appearance-none">
-            <option>Select account</option>
-          </select>
+          <Select defaultValue="none">
+            <SelectTrigger className="h-11 w-full bg-white border-slate-200 rounded-xl text-sm font-medium shadow-sm text-slate-700">
+              <SelectValue placeholder="Select account" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Select account</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -198,27 +224,47 @@ export default function ExpenseClient() {
         <div className="flex items-center gap-2">
           <div className="flex flex-col gap-1">
              <span className="text-[11px] font-semibold text-slate-500 ml-1">Group</span>
-             <select className="h-10 px-3 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-primary cursor-pointer shadow-sm">
-                <option>All Groups</option>
-             </select>
+             <Select defaultValue="all">
+               <SelectTrigger className="h-10 w-[140px] bg-white border-slate-200 rounded-xl text-sm font-medium shadow-sm">
+                 <SelectValue placeholder="All Groups" />
+               </SelectTrigger>
+               <SelectContent>
+                 <SelectItem value="all">All Groups</SelectItem>
+               </SelectContent>
+             </Select>
           </div>
           <div className="flex flex-col gap-1">
              <span className="text-[11px] font-semibold text-slate-500 ml-1">Category</span>
-             <select className="h-10 px-3 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-primary cursor-pointer shadow-sm">
-                <option>All Categories</option>
-             </select>
+             <Select defaultValue="all">
+               <SelectTrigger className="h-10 w-[140px] bg-white border-slate-200 rounded-xl text-sm font-medium shadow-sm">
+                 <SelectValue placeholder="All Categories" />
+               </SelectTrigger>
+               <SelectContent>
+                 <SelectItem value="all">All Categories</SelectItem>
+               </SelectContent>
+             </Select>
           </div>
           <div className="flex flex-col gap-1">
              <span className="text-[11px] font-semibold text-slate-500 ml-1">Payment Mode</span>
-             <select className="h-10 px-3 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-primary cursor-pointer shadow-sm">
-                <option>All Payment Modes</option>
-             </select>
+             <Select defaultValue="all">
+               <SelectTrigger className="h-10 w-[160px] bg-white border-slate-200 rounded-xl text-sm font-medium shadow-sm">
+                 <SelectValue placeholder="All Payment Modes" />
+               </SelectTrigger>
+               <SelectContent>
+                 <SelectItem value="all">All Payment Modes</SelectItem>
+               </SelectContent>
+             </Select>
           </div>
           <div className="flex flex-col gap-1">
              <span className="text-[11px] font-semibold text-slate-500 ml-1">Account</span>
-             <select className="h-10 px-3 bg-white border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-primary cursor-pointer shadow-sm">
-                <option>All Accounts</option>
-             </select>
+             <Select defaultValue="all">
+               <SelectTrigger className="h-10 w-[140px] bg-white border-slate-200 rounded-xl text-sm font-medium shadow-sm">
+                 <SelectValue placeholder="All Accounts" />
+               </SelectTrigger>
+               <SelectContent>
+                 <SelectItem value="all">All Accounts</SelectItem>
+               </SelectContent>
+             </Select>
           </div>
         </div>
         <div className="ml-auto mt-5">
@@ -294,81 +340,86 @@ export default function ExpenseClient() {
                  <Button variant="outline" size="sm" className="h-8 rounded-lg w-8 p-0 flex items-center justify-center">
                    <LayoutGrid className="w-4 h-4 text-slate-500" />
                  </Button>
-                 <select className="h-8 px-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold outline-none cursor-pointer">
-                   <option>Date: Newest</option>
-                 </select>
+                 <Select defaultValue="newest">
+                   <SelectTrigger className="h-8 text-xs bg-white border-slate-200 rounded-lg font-semibold w-[120px]">
+                     <SelectValue placeholder="Sort by" />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="newest">Date: Newest</SelectItem>
+                   </SelectContent>
+                 </Select>
                </div>
              </div>
              
              <div className="flex-1 w-full overflow-x-auto">
-               <table className="w-full text-sm text-left">
-                 <thead className="text-xs text-slate-500 uppercase bg-slate-50/50">
-                   <tr>
-                     <th className="px-5 py-4 font-semibold w-10">
-                       <input type="checkbox" className="rounded text-primary border-slate-300 focus:ring-primary" />
-                     </th>
-                     <th className="px-5 py-4 font-semibold">Date</th>
-                     <th className="px-5 py-4 font-semibold">Description</th>
-                     <th className="px-5 py-4 font-semibold">Group</th>
-                     <th className="px-5 py-4 font-semibold">Category</th>
-                     <th className="px-5 py-4 font-semibold">Payment Mode</th>
-                     <th className="px-5 py-4 font-semibold">Account</th>
-                     <th className="px-5 py-4 font-semibold text-right">Amount</th>
-                     <th className="px-5 py-4 font-semibold text-center w-10"></th>
-                   </tr>
-                 </thead>
-                 <tbody>
+               <Table>
+                 <TableHeader className="bg-slate-50/50">
+                   <TableRow>
+                     <TableHead className="w-10">
+                       <Checkbox />
+                     </TableHead>
+                     <TableHead>Date</TableHead>
+                     <TableHead>Description</TableHead>
+                     <TableHead>Group</TableHead>
+                     <TableHead>Category</TableHead>
+                     <TableHead>Payment Mode</TableHead>
+                     <TableHead>Account</TableHead>
+                     <TableHead className="text-right">Amount</TableHead>
+                     <TableHead className="text-center w-10"></TableHead>
+                   </TableRow>
+                 </TableHeader>
+                 <TableBody>
                    {/* Dummy row representing mockup */}
-                   <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                     <td className="px-5 py-4"><input type="checkbox" className="rounded border-slate-300" /></td>
-                     <td className="px-5 py-4 text-slate-600 whitespace-nowrap">May 31, 2025</td>
-                     <td className="px-5 py-4 font-bold text-slate-900 flex items-center gap-3">
+                   <TableRow>
+                     <TableCell><Checkbox /></TableCell>
+                     <TableCell className="text-slate-600 whitespace-nowrap">May 31, 2025</TableCell>
+                     <TableCell className="font-bold text-slate-900 flex items-center gap-3">
                        <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs">U</div>
                        Uber Ride
-                     </td>
-                     <td className="px-5 py-4"><Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-none">Travel</Badge></td>
-                     <td className="px-5 py-4 text-slate-600">Local Transport</td>
-                     <td className="px-5 py-4 text-slate-900 font-medium flex items-center gap-2"><CreditCard className="w-4 h-4 text-purple-600" /> UPI</td>
-                     <td className="px-5 py-4 text-slate-600">HDFC Bank</td>
-                     <td className="px-5 py-4 text-right font-bold text-red-500">- ₹ 320.00</td>
-                     <td className="px-5 py-4 text-center"><MoreHorizontal className="w-4 h-4 text-slate-400 cursor-pointer hover:text-slate-900" /></td>
-                   </tr>
-                   <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                     <td className="px-5 py-4"><input type="checkbox" className="rounded border-slate-300" /></td>
-                     <td className="px-5 py-4 text-slate-600 whitespace-nowrap">May 30, 2025</td>
-                     <td className="px-5 py-4 font-bold text-slate-900 flex items-center gap-3">
+                     </TableCell>
+                     <TableCell><Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-none">Travel</Badge></TableCell>
+                     <TableCell className="text-slate-600">Local Transport</TableCell>
+                     <TableCell className="text-slate-900 font-medium"><div className="flex items-center gap-2"><CreditCard className="w-4 h-4 text-purple-600" /> UPI</div></TableCell>
+                     <TableCell className="text-slate-600">HDFC Bank</TableCell>
+                     <TableCell className="text-right font-bold text-red-500">- ₹ 320.00</TableCell>
+                     <TableCell className="text-center"><MoreHorizontal className="w-4 h-4 text-slate-400 cursor-pointer hover:text-slate-900" /></TableCell>
+                   </TableRow>
+                   <TableRow>
+                     <TableCell><Checkbox /></TableCell>
+                     <TableCell className="text-slate-600 whitespace-nowrap">May 30, 2025</TableCell>
+                     <TableCell className="font-bold text-slate-900 flex items-center gap-3">
                        <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs">L</div>
                        Lunch with Friends
-                     </td>
-                     <td className="px-5 py-4"><Badge className="bg-orange-50 text-orange-700 hover:bg-orange-100 border-none">Food</Badge></td>
-                     <td className="px-5 py-4 text-slate-600">Dining Out</td>
-                     <td className="px-5 py-4 text-slate-900 font-medium flex items-center gap-2"><CreditCard className="w-4 h-4 text-blue-600" /> Credit Card</td>
-                     <td className="px-5 py-4 text-slate-600">HDFC Bank</td>
-                     <td className="px-5 py-4 text-right font-bold text-red-500">- ₹ 650.00</td>
-                     <td className="px-5 py-4 text-center"><MoreHorizontal className="w-4 h-4 text-slate-400 cursor-pointer hover:text-slate-900" /></td>
-                   </tr>
+                     </TableCell>
+                     <TableCell><Badge className="bg-orange-50 text-orange-700 hover:bg-orange-100 border-none">Food</Badge></TableCell>
+                     <TableCell className="text-slate-600">Dining Out</TableCell>
+                     <TableCell className="text-slate-900 font-medium"><div className="flex items-center gap-2"><CreditCard className="w-4 h-4 text-blue-600" /> Credit Card</div></TableCell>
+                     <TableCell className="text-slate-600">HDFC Bank</TableCell>
+                     <TableCell className="text-right font-bold text-red-500">- ₹ 650.00</TableCell>
+                     <TableCell className="text-center"><MoreHorizontal className="w-4 h-4 text-slate-400 cursor-pointer hover:text-slate-900" /></TableCell>
+                   </TableRow>
                    {filtered.map(exp => (
-                     <tr key={exp.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                       <td className="px-5 py-4"><input type="checkbox" className="rounded border-slate-300" /></td>
-                       <td className="px-5 py-4 text-slate-600 whitespace-nowrap">{new Date(exp.date).toLocaleDateString()}</td>
-                       <td className="px-5 py-4 font-bold text-slate-900 flex items-center gap-3">
+                     <TableRow key={exp.id}>
+                       <TableCell><Checkbox /></TableCell>
+                       <TableCell className="text-slate-600 whitespace-nowrap">{new Date(exp.date).toLocaleDateString()}</TableCell>
+                       <TableCell className="font-bold text-slate-900 flex items-center gap-3">
                          <div className="w-8 h-8 rounded-full text-white flex items-center justify-center text-xs" style={{ backgroundColor: exp.category.color || '#16a34a' }}>
                            {exp.title.charAt(0)}
                          </div>
                          {exp.title}
-                       </td>
-                       <td className="px-5 py-4">
+                       </TableCell>
+                       <TableCell>
                          {exp.group && <Badge variant="outline" className="border-none bg-slate-100 text-slate-700">{exp.group.name}</Badge>}
-                       </td>
-                       <td className="px-5 py-4 text-slate-600">{exp.category.name}</td>
-                       <td className="px-5 py-4 text-slate-900 font-medium">UPI</td>
-                       <td className="px-5 py-4 text-slate-600">Bank</td>
-                       <td className="px-5 py-4 text-right font-bold text-red-500">- ₹ {exp.amount.toFixed(2)}</td>
-                       <td className="px-5 py-4 text-center"><MoreHorizontal className="w-4 h-4 text-slate-400 cursor-pointer hover:text-slate-900" /></td>
-                     </tr>
+                       </TableCell>
+                       <TableCell className="text-slate-600">{exp.category.name}</TableCell>
+                       <TableCell className="text-slate-900 font-medium">UPI</TableCell>
+                       <TableCell className="text-slate-600">Bank</TableCell>
+                       <TableCell className="text-right font-bold text-red-500">- ₹ {exp.amount.toFixed(2)}</TableCell>
+                       <TableCell className="text-center"><MoreHorizontal className="w-4 h-4 text-slate-400 cursor-pointer hover:text-slate-900" /></TableCell>
+                     </TableRow>
                    ))}
-                 </tbody>
-               </table>
+                 </TableBody>
+               </Table>
              </div>
              
              <div className="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500 bg-slate-50/50">
