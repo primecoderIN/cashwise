@@ -6,27 +6,27 @@ export declare class ExpensesService {
         category: {
             id: string;
             name: string;
+            createdAt: Date;
+            updatedAt: Date;
             color: string;
             icon: string;
             userId: string;
-            createdAt: Date;
-            updatedAt: Date;
         };
         group: {
             id: string;
             name: string;
+            createdAt: Date;
+            updatedAt: Date;
             color: string;
             icon: string;
             userId: string;
-            createdAt: Date;
-            updatedAt: Date;
             description: string | null;
         } | null;
     } & {
         id: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         title: string;
         amount: number;
         date: Date;
@@ -45,9 +45,9 @@ export declare class ExpensesService {
         success: boolean;
         expense: {
             id: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
+            userId: string;
             title: string;
             amount: number;
             date: Date;
@@ -60,9 +60,9 @@ export declare class ExpensesService {
         success: boolean;
         expense: {
             id: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
+            userId: string;
             title: string;
             amount: number;
             date: Date;

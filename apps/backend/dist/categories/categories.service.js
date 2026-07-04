@@ -26,10 +26,7 @@ let CategoriesService = class CategoriesService {
     async createCategory(userId, data) {
         try {
             const category = await this.prisma.category.create({
-                data: {
-                    ...data,
-                    userId,
-                },
+                data: { ...data, userId },
             });
             return { success: true, category };
         }
@@ -40,10 +37,7 @@ let CategoriesService = class CategoriesService {
     async deleteCategory(userId, categoryId) {
         try {
             await this.prisma.category.delete({
-                where: {
-                    id: categoryId,
-                    userId,
-                },
+                where: { id: categoryId, userId },
             });
             return { success: true };
         }

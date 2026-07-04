@@ -13,7 +13,7 @@ export class GroupsController {
   }
 
   @Post()
-  async createGroup(@Request() req, @Body() data: { name: string; description?: string }) {
+  async createGroup(@Request() req, @Body() data: { name: string; description?: string; icon?: string; color?: string }) {
     return this.groupsService.createGroup(req.user.id, data);
   }
 

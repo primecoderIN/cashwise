@@ -5,26 +5,28 @@ export declare class GroupsController {
     getGroups(req: any): Promise<{
         id: string;
         name: string;
+        createdAt: Date;
+        updatedAt: Date;
         color: string;
         icon: string;
         userId: string;
-        createdAt: Date;
-        updatedAt: Date;
         description: string | null;
     }[]>;
     createGroup(req: any, data: {
         name: string;
         description?: string;
+        icon?: string;
+        color?: string;
     }): Promise<{
         success: boolean;
         group: {
             id: string;
             name: string;
+            createdAt: Date;
+            updatedAt: Date;
             color: string;
             icon: string;
             userId: string;
-            createdAt: Date;
-            updatedAt: Date;
             description: string | null;
         };
     }>;

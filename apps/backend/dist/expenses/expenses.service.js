@@ -56,10 +56,7 @@ let ExpensesService = class ExpensesService {
     async deleteExpense(userId, expenseId) {
         try {
             await this.prisma.expense.delete({
-                where: {
-                    id: expenseId,
-                    userId,
-                },
+                where: { id: expenseId, userId },
             });
             return { success: true };
         }

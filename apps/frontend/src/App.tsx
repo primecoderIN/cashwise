@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useAuth } from "@clerk/clerk-react";
 import AppSidebar from './components/layout/AppSidebar';
@@ -6,9 +7,9 @@ import LandingPage from './pages/LandingPage';
 import CategoryClient from './components/categories/CategoryClient';
 import ExpenseClient from './components/expenses/ExpenseClient';
 import GroupClient from './components/groups/GroupClient';
-
 import DashboardClient from './pages/DashboardClient';
 import { Toaster } from 'react-hot-toast';
+import { setTokenGetter } from './lib/api';
 
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -27,7 +28,12 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn, isLoaded, getToken } = useAuth();
+
+  // Wire Clerk's getToken into the Axios interceptor as soon as auth loads
+  useEffect(() => {
+    setTokenGetter(() => getToken());
+  }, [getToken]);
 
   if (!isLoaded) {
     return (

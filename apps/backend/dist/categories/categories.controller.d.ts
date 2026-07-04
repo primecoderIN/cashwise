@@ -5,11 +5,11 @@ export declare class CategoriesController {
     getCategories(req: any): Promise<{
         id: string;
         name: string;
+        createdAt: Date;
+        updatedAt: Date;
         color: string;
         icon: string;
         userId: string;
-        createdAt: Date;
-        updatedAt: Date;
     }[]>;
     createCategory(req: any, data: {
         name: string;
@@ -20,11 +20,11 @@ export declare class CategoriesController {
         category: {
             id: string;
             name: string;
+            createdAt: Date;
+            updatedAt: Date;
             color: string;
             icon: string;
             userId: string;
-            createdAt: Date;
-            updatedAt: Date;
         };
     }>;
     deleteCategory(req: any, id: string): Promise<{

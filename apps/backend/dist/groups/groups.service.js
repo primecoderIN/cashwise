@@ -27,7 +27,10 @@ let GroupsService = class GroupsService {
         try {
             const group = await this.prisma.expenseGroup.create({
                 data: {
-                    ...data,
+                    name: data.name,
+                    description: data.description,
+                    icon: data.icon ?? 'folder',
+                    color: data.color ?? '#16a34a',
                     userId,
                 },
             });
@@ -40,10 +43,7 @@ let GroupsService = class GroupsService {
     async deleteGroup(userId, groupId) {
         try {
             await this.prisma.expenseGroup.delete({
-                where: {
-                    id: groupId,
-                    userId,
-                },
+                where: { id: groupId, userId },
             });
             return { success: true };
         }

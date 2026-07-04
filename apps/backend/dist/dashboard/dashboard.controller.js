@@ -61,7 +61,7 @@ exports.DashboardController = DashboardController = __decorate([
     (0, swagger_1.ApiTags)('Dashboard'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
-    (0, common_1.Controller)('dashboard'),
+    (0, common_1.Controller)('api/dashboard'),
     __metadata("design:paramtypes", [dashboard_service_1.DashboardService])
 ], DashboardController);
 //# sourceMappingURL=dashboard.controller.js.map

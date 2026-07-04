@@ -14,7 +14,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
-      exclude: ['/api/(.*)'],
+      exclude: ['/api/{*path}'],
     }),
     PrismaModule,
     AuthModule,

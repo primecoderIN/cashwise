@@ -6,7 +6,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 @ApiTags('Dashboard')
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
-@Controller('dashboard')
+@Controller('api/dashboard')
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
