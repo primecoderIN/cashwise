@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: cashwise
+    env: node
+    plan: free
+    buildCommand: npm install --include=dev && cd apps/backend && npx prisma generate && cd ../.. && npm run build && cd apps/backend && npx prisma migrate deploy
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cashwise-db
+          property: connectionString
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: VITE_CLERK_PUBLISHABLE_KEY
+        sync: false
+
+databases:
+  - name: cashwise-db
+    plan: free
