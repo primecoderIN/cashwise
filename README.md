@@ -4,7 +4,18 @@ CashWise is a modern personal finance tracking application built as an **npm wor
 
 ---
 
-## Architecture
+## System Architecture
+
+CashWise operates on a decoupled client-server architecture during development, but compiles down to a single-server deployment in production.
+
+### High-Level Flow
+1. **Client Layer**: The user interacts with the React frontend (Vite).
+2. **State & Fetching**: TanStack React Query handles caching and remote data fetching.
+3. **Authentication**: Clerk handles user identity and JWT issuance.
+4. **API Layer**: Requests are sent to the NestJS backend, authorized via a global AuthGuard that verifies the Clerk JWT.
+5. **Data Layer**: NestJS services use Prisma ORM to interact with the PostgreSQL database.
+
+### Monorepo Structure (npm workspaces)
 
 ```
 cashwise/
@@ -12,33 +23,51 @@ cashwise/
 │   ├── frontend/          # React 19 + Vite + TailwindCSS v4 + shadcn/ui
 │   └── backend/           # NestJS 11 + Prisma 7 + PostgreSQL
 ├── packages/
-│   ├── shared-types/      # Shared TypeScript interfaces
-│   ├── shared-constants/  # Shared constants
-│   └── shared-utils/      # Shared utility functions
+│   ├── shared-types/      # Interfaces shared across frontend and backend
+│   ├── shared-constants/  # Reusable constants
+│   └── shared-utils/      # Helper utilities
 ├── scripts/
-│   └── copy-frontend.js   # Copies frontend dist → backend/public after build
-└── package.json           # Root workspace config
+│   └── copy-frontend.js   # Production build orchestration script
+└── package.json           # Root workspace config defining workspaces
 ```
 
+The Monorepo setup allows the frontend and backend to seamlessly share DTOs and types (from `packages/shared-types`), ensuring type safety across the network boundary.
+
 ### Frontend (`apps/frontend`)
+The frontend is a Single Page Application (SPA) structured around feature components.
 | Tech | Purpose |
 |---|---|
-| React 19 + Vite | UI framework + dev server |
-| TailwindCSS v4 + shadcn/ui | Styling and components |
-| Clerk (`@clerk/clerk-react`) | Authentication |
-| TanStack Query | Server state / data fetching |
-| Recharts | Dashboard charts |
-| React Hook Form + Zod | Form validation |
+| **React 19 + Vite** | High-performance UI framework and dev server. |
+| **TailwindCSS v4 + shadcn/ui** | Atomic styling and accessible, unstyled component primitives. |
+| **Clerk (`@clerk/clerk-react`)** | Provides the `<ClerkProvider>` and UI components for seamless login. |
+| **TanStack Query** | Manages server state, handles loading/error states, and invalidates caches. |
+| **Recharts** | Renders dynamic financial charts for the dashboard. |
+| **React Hook Form + Zod** | Strongly-typed form validation. |
 
 ### Backend (`apps/backend`)
+The backend is a REST API built on NestJS's modular architecture.
 | Tech | Purpose |
 |---|---|
-| NestJS 11 | HTTP framework |
-| Prisma 7 | ORM (uses Driver Adapter pattern) |
-| `@prisma/adapter-pg` | PostgreSQL driver adapter (required by Prisma 7) |
-| `@clerk/backend` | JWT token verification |
-| `@nestjs/serve-static` | Serves compiled React app in production |
-| `@nestjs/swagger` | API docs (development only) |
+| **NestJS 11** | Provides dependency injection, routing, and guards (AuthGuard). |
+| **Prisma 7** | Type-safe ORM for database migrations and queries. |
+| **PostgreSQL** | Relational database (connected via `@prisma/adapter-pg`). |
+| **`@clerk/backend`** | Verifies JWT tokens on incoming requests. |
+| **`@nestjs/serve-static`** | In production, serves the compiled React app alongside the API. |
+| **`@nestjs/swagger`** | Generates interactive API documentation (dev only). |
+
+### Authentication Flow
+1. User logs in on the frontend using Clerk's pre-built UI.
+2. Clerk provides a short-lived Session JWT.
+3. The frontend passes this token in the `Authorization: Bearer <token>` header for API requests.
+4. The NestJS backend `AuthGuard` extracts the token and uses `@clerk/backend` to verify its signature and expiration.
+5. If valid, the user's `clerkId` is attached to the request object. If the user doesn't exist in the database yet, they are created automatically.
+
+### Production Deployment Architecture
+To simplify deployment, CashWise avoids needing two separate hosting services:
+1. `npm run build` runs `tsc` and `vite build` on the frontend.
+2. The `copy-frontend.js` script copies the frontend static files (`dist`) into the backend's `public` directory.
+3. The backend is compiled.
+4. When `start:prod` is run, a single Node.js process spins up. NestJS serves API requests on `/api/*` and uses `@nestjs/serve-static` to serve the React SPA on all other routes.
 
 ---
 
