@@ -9,14 +9,8 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: cashwise-db
-          property: connectionString
+        sync: false
       - key: CLERK_SECRET_KEY
         sync: false
       - key: VITE_CLERK_PUBLISHABLE_KEY
         sync: false
-
-databases:
-  - name: cashwise-db
-    plan: free
